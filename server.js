@@ -53,6 +53,7 @@ io.on('connection', (socket)=> {
   })
 
   socket.on('join-room', async(newRoom, previousRoom)=> {
+    // need to leave previous room in order to join newroom 
     socket.join(newRoom);
     socket.leave(previousRoom);
     let roomMessages = await getLastMessagesFromRoom(newRoom);
