@@ -1,8 +1,10 @@
+
 const express = require('express');
 const app = express();
 const userRoutes = require('./routes/userRoutes')
 const User = require('./models/User');
 const Message = require('./models/Message')
+
 const rooms = ['general', 'tech', 'finance', 'crypto'];
 const cors = require('cors');
 
@@ -17,6 +19,7 @@ const server = require('http').createServer(app);
 const PORT = 5001;
 const io = require('socket.io')(server, {
   cors: {
+    // Front End 
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST']
   }
