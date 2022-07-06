@@ -1,18 +1,23 @@
 
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const userRoutes = require('./routes/userRoutes')
 const User = require('./models/User');
 const Message = require('./models/Message')
 
+// available rooms
 const rooms = ['general', 'tech', 'finance', 'crypto'];
-const cors = require('cors');
 
+
+// Middleware
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(cors());
 
+// Routes
 app.use('/users', userRoutes)
+
 require('./connection')
 
 const server = require('http').createServer(app);
@@ -25,8 +30,9 @@ const io = require('socket.io')(server, {
   }
 })
 
-
+// Once user joins room, send all messages for that specific room
 async function getLastMessagesFromRoom(room){
+  // query specifc messages by date
   let roomMessages = await Message.aggregate([
     {$match: {to: room}},
     {$group: {_id: '$date', messagesByDate: {$push: '$$ROOT'}}}
@@ -35,10 +41,11 @@ async function getLastMessagesFromRoom(room){
 }
 
 function sortRoomMessagesByDate(messages){
+  // latest to newest
   return messages.sort(function(a, b){
     let date1 = a._id.split('/');
     let date2 = b._id.split('/');
-
+    // YYYYMMDD
     date1 = date1[2] + date1[0] + date1[1]
     date2 =  date2[2] + date2[0] + date2[1];
 
@@ -56,7 +63,7 @@ io.on('connection', (socket)=> {
   })
 
   socket.on('join-room', async(newRoom, previousRoom)=> {
-    // need to leave previous room in order to join newroom 
+    // need to leave previous room in order to join newRoom 
     socket.join(newRoom);
     socket.leave(previousRoom);
     let roomMessages = await getLastMessagesFromRoom(newRoom);
@@ -65,14 +72,19 @@ io.on('connection', (socket)=> {
   })
 
   socket.on('message-room', async(room, content, sender, time, date) => {
-    const newMessage = await Message.create({content, from: sender, time, date, to: room});
+    const newMessage = await Message.create({
+      content, 
+      from: sender, time, date, 
+      to: room
+    });
     let roomMessages = await getLastMessagesFromRoom(room);
     roomMessages = sortRoomMessagesByDate(roomMessages);
     // sending message to room
     io.to(room).emit('room-messages', roomMessages);
+    // send notification to users not in room
     socket.broadcast.emit('notifications', room)
   })
-
+  // Logout
   app.delete('/logout', async(req, res)=> {
     try {
       const {_id, newMessages} = req.body;
@@ -91,7 +103,7 @@ io.on('connection', (socket)=> {
 
 })
 
-
+// send back rooms
 app.get('/rooms', (req, res)=> {
   res.json(rooms)
 })
