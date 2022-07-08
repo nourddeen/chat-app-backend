@@ -7,7 +7,7 @@ const User = require('./models/User');
 const Message = require('./models/Message')
 
 // available rooms
-const rooms = ['general', 'tech', 'finance', 'crypto'];
+const rooms = ['General', 'Sales', 'Customer Success', 'Account Receivables', 'Jokes'];
 
 
 // Middleware
@@ -89,7 +89,7 @@ io.on('connection', (socket)=> {
     try {
       const {_id, newMessages} = req.body;
       const user = await User.findById(_id);
-      user.status = "offline";
+      user.status = 'offline';
       user.newMessages = newMessages;
       await user.save();
       const members = await User.find();
