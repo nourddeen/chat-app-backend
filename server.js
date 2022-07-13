@@ -25,7 +25,7 @@ const PORT = 5001;
 const io = require('socket.io')(server, {
   cors: {
     // Front End 
-    origin: 'http://localhost:3000',
+    origin: 'https://c-app.herokuapp.com',
     methods: ['GET', 'POST']
   }
 })
