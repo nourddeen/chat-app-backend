@@ -21,7 +21,7 @@ app.use('/users', userRoutes)
 require('./connection')
 
 const server = require('http').createServer(app);
-const port = process.env.PORT || 5001
+const PORT = process.env.PORT || 5001
 const io = require('socket.io')(server, {
   cors: {
     // Front End 
@@ -109,6 +109,6 @@ app.get('/rooms', (req, res)=> {
 })
 
 
-server.listen(port, ()=> {
-  console.log('listening to port', port)
+server.listen(PORT, ()=> {
+  console.log('listening to port', PORT)
 })
